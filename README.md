@@ -1,13 +1,13 @@
-# CS180 Project 4:
+# CS180 Project 5:
 
-The project is fitted into Option 2. The team decided to develop a messaging system. The system will be extend with GUI and multi-threading in the coming Project 5.
+The project is fitted into Option 2. The team decided to develop a messaging system. The system is extend with GUI and multi-threading based on Project 4.
  
 Two Selection methods are implemented: 
 1. Block/Invisible Users 
 2. Import/Export Conversations
 
 ## Compile and Run
-The main function is located at Client Start. Running should be started from that location. The "file" directory should be located under the home directory of running. Pre-testing data stored in the diretcory, and can be removed if needed, while the structure of the directory must stays.
+The main function of Cliengt is located at Start.java. However, the server instance must be started before the clinet can be start. The start of the server is located at Session.java. The minimal requirement of Java version is OpenJDK 17.
 
 ## Submission
 Vocareum: LK Niu niu61
@@ -16,10 +16,12 @@ Lab Report: Matthew Rops mjrops
 ## Functionalities of Classes
 Functionalities of the system
 
-### CLIClient.java
+### Client.java
 The running and coordination class, it also contains the functionality of file import and export. 
-### ClientStart.java
+### Start.java
 The starter class
+### Session.java
+The Server hendel mutiple access at the same time.
 ### Login.java
 Handling login and user operations.
 ### Message.java
