@@ -1,0 +1,4 @@
+email0@mail.com;123123;Seller;
+email2@mail.com;123123;Seller;
+niu61@purdue.edu;123123;Customer;
+email1@mail.com;123123;Customer;

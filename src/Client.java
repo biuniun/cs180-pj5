@@ -1,6 +1,5 @@
-package client;
+package users;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -8,56 +7,54 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-import users.Customer;
-import users.Message;
-import users.NotSCException;
-import users.Roles;
-import users.Seller;
-import users.Store;
-import users.User;
+public class Client extends JComponent implements Runnable {
+    // private static final String ACCOUNT_INFO_PATH = "file" + File.separator + "account_list.txt";
 
-public class CLIClient extends JComponent implements Runnable {
-    User sessionUser;
-    String dest;
-    ArrayList<Message> messageList;
-    int oldX; // previous mouse x coordinate
-    int oldY; // previous mouse y coordinate
-    CLIClient client;
-    //components of the Panel
-    //login/register functionality
-    JTextField usernameTextField;
-    JTextField passwordTextField;
-    JButton loginButton;
-    JButton registerButton;
-    JButton logoutButton;
+    private static Login login = new Login();
+    private static Map<String, User> usermap = login.getUsers();
 
-    //all user options
-    static JTextArea instructionsTextArea;
-    JTextArea contentTextArea;
-    static JTextField userInputTextField;
-    JButton blockUserButton;
+    private User sessionUser;
+    private String dest;
+    private ArrayList<Message> messageList;
+    private Client client;
+    // components of the Panel
+    // login/register functionality
+    private JTextField usernameTextField;
+    private JTextField passwordTextField;
+    private JButton loginButton;
+    private JButton registerButton;
+    private JButton logoutButton;
 
-    static JButton accountManagementButton;
-    JButton deleteAccountButton;
-    JButton modifyAccountButton;
+    // all user options
+    private static JTextArea instructionsTextArea;
+    private JTextArea contentTextArea;
+    private static JTextField userInputTextField;
+    private JButton blockUserButton;
 
-    static JButton messageButton;
-    JButton sendMessageButton;
-    JButton loadConversationButton;
-    JButton editMessageButton;
-    JButton deleteMessageButton;
+    private static JButton accountManagementButton;
+    private JButton deleteAccountButton;
+    private JButton modifyAccountButton;
 
-    //seller specific options
-    static JButton addStoreButton;
-    static JButton viewStoresButton;
+    private static JButton messageButton;
+    private JButton sendMessageButton;
+    private JButton loadConversationButton;
+    private JButton editMessageButton;
+    private JButton deleteMessageButton;
 
-    //cutomer specific options
-    JButton messageStoreButton;
-    
+    // seller specific options
+    private static JButton addStoreButton;
+    private static JButton viewStoresButton;
+
+    // cutomer specific options
+    private JButton messageStoreButton;
+
+
+
     ActionListener actionListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (e.getSource() == loginButton) { //WORKING
+            contentTextArea.setText("");
+            if (e.getSource() == loginButton) { // WORKING
                 String username = usernameTextField.getText();
                 String password = passwordTextField.getText();
                 sessionUser = client.loginButton(username, password);
@@ -66,27 +63,30 @@ public class CLIClient extends JComponent implements Runnable {
                     loginButton.setVisible(false);
                     registerButton.setVisible(false);
                     if (sessionUser.getUserType().toString().equals("Customer")) {
-                        instructionsTextArea.setText("Click 'Account Management' to manage your account or click 'Message' to send messages or view your existing conversations.");
+                        instructionsTextArea.setText(
+                                "Click 'Account Management' to manage your account or click 'Message' to send messages or view your existing conversations.");
                     } else {
-                        instructionsTextArea.setText("Click 'Account Management' to manage your account, click 'Message' to send messages or view your existing conversations, or enter your store's name in the user input input field and click 'Add Store' to add a new store.");
+                        instructionsTextArea.setText(
+                                "Click 'Account Management' to manage your account, click 'Message' to send messages or view your existing conversations, or enter your store's name in the user input input field and click 'Add Store' to add a new store.");
                     }
                 } else {
                     contentTextArea.setText("Couldn't log in. Try again");
                 }
             }
-            if (e.getSource() == registerButton) { //WORKING
+            if (e.getSource() == registerButton) { // WORKING
                 String username = usernameTextField.getText();
                 String password = passwordTextField.getText();
                 String role = userInputTextField.getText();
                 String message = client.registerButton(username, password, role);
                 contentTextArea.setText(message);
             }
-            if (e.getSource() == logoutButton) { //WORKING BUT NEEDS TO MAKE OTHER BUTTONS INVISIBLE LATER
-                sessionUser = null; //reset sessionUser
+            if (e.getSource() == logoutButton) { // WORKING
+                sessionUser = null; // reset sessionUser
 
                 usernameTextField.setText("username");
                 passwordTextField.setText("password");
-                instructionsTextArea.setText("Login by entering your username and password. If you're registering a user, register by entering your username and password and designate your role by typing 'Seller' or 'Customer' into the user input field");
+                instructionsTextArea.setText(
+                        "Login by entering your username and password. If you're registering a user, register by entering your username and password and designate your role by typing 'Seller' or 'Customer' into the user input field");
                 contentTextArea.setText("Successfully logged out!");
                 userInputTextField.setText("user input");
 
@@ -102,12 +102,12 @@ public class CLIClient extends JComponent implements Runnable {
                 messageStoreButton.setVisible(false);
                 loadConversationButton.setVisible(false);
                 blockUserButton.setVisible(false);
-
+                
                 loginButton.setVisible(true);
                 registerButton.setVisible(true);
-            }
-            if (e.getSource() == accountManagementButton) { //WORKING
 
+            }
+            if (e.getSource() == accountManagementButton) { // WORKING
                 modifyAccountButton.setVisible(true);
                 deleteAccountButton.setVisible(true);
                 addStoreButton.setVisible(true);
@@ -117,36 +117,17 @@ public class CLIClient extends JComponent implements Runnable {
                 editMessageButton.setVisible(false);
                 deleteMessageButton.setVisible(false);
                 blockUserButton.setVisible(false);
-                
-                String instructions = "Delete this account with the 'Delete Account' button, or modify the account's username, password or both by entering your new username and/or password in the username and password textboxes";
+
+                String instructions = "You can \n1. Delete this account with the 'Delete Account' button\n2.modify the account's username, password or both by entering your new username or password in the username and password textboxes(One By a Time)";
                 if (sessionUser.getUserType() == Roles.Customer) {
                     instructionsTextArea.setText(instructions);
                 } else {
-                    instructionsTextArea.setText(instructions + ", or add a new store by typing the store's name in the user input text box");
+                    instructionsTextArea.setText(instructions
+                            + "\n3. Add a new store by typing the store's name in the user input text box");
                 }
             }
-            if (e.getSource() == messageButton) { //WORKS
-                dest = null; // reset message destination
-
-                contentTextArea.setText(client.messageButton());
-                sendMessageButton.setVisible(true);
-                blockUserButton.setVisible(true);
-                loadConversationButton.setVisible(true);
-
-                if(sessionUser.getUserType() == Roles.Customer) {
-                    messageStoreButton.setVisible(true);
-                    instructionsTextArea.setText("Select an existing conversation by typing the email of the user in the user input input field, or type in a user from the list along with the message you want to send seperated by a comma (,) to create a new conversation, or type the store's name along with the message you want to send seperated by a comma. The format for sending a message is [email],[message] or [store],[message]");
-                } else {
-                    instructionsTextArea.setText("Select an existing conversation by typing the email of the user in the user input input field or type in a user from the list along with the message you want to send seperated by a comma (,) to create a new conversation. The format for sending a message is [email],[message]");
-                }
-
-                editMessageButton.setVisible(false);
-                deleteMessageButton.setVisible(false);
-                deleteAccountButton.setVisible(false);
-                modifyAccountButton.setVisible(false);
-                addStoreButton.setVisible(false);
-
-                
+            if (e.getSource() == messageButton) { // WORKING
+                loadMessage();
             }
             if (e.getSource() == blockUserButton) {
                 String blockUser = userInputTextField.getText();
@@ -160,7 +141,7 @@ public class CLIClient extends JComponent implements Runnable {
                     contentTextArea.setText("Can't block user. No user found");
                 }
             }
-            if (e.getSource() == addStoreButton) { //WORKS
+            if (e.getSource() == addStoreButton) { // WORKING
                 deleteAccountButton.setVisible(false);
                 modifyAccountButton.setVisible(false);
                 loadConversationButton.setVisible(false);
@@ -196,42 +177,49 @@ public class CLIClient extends JComponent implements Runnable {
             if (e.getSource() == messageStoreButton) {
                 Map<String, String> storeList = Store.getStores();
                 String[] content = userInputTextField.getText().split(",");
-            
+
                 if (content.length == 2) {
                     String storeName = content[0];
                     String message = content[1];
-            
+
                     if (storeList.containsKey(storeName)) {
                         String storeOwner = storeList.get(storeName);
                         User destUser = null;
 
                         if (sessionUser.getUserType() == Roles.Customer) {
-                            if (!usermap.values().contains(destUser = new Seller(storeOwner)) && !destUser.getBlockedUsers().contains(sessionUser)) { //checks for if the session user is blocked
+                            if (!usermap.values().contains(destUser = new Seller(storeOwner))
+                                    && !destUser.getBlockedUsers().contains(sessionUser.getEmail())) { // checks for if the session
+                                                                                            // user is blocked
                                 try {
                                     sendMessage(message, sessionUser, destUser);
-                                    contentTextArea.setText("Successfully sent the owner of " + storeName + " a message!");
+                                    contentTextArea
+                                            .setText("Successfully sent the owner of " + storeName + " a message!");
                                 } catch (NotSCException ex) {
-                                    contentTextArea.setText("Failed to send a message to the owner of " + storeName + "! Either the store doesn't exist or the owner has blocked you.");
+                                    contentTextArea.setText("Failed to send a message to the owner of " + storeName
+                                            + "! Either the store doesn't exist or the owner has blocked you.");
                                 }
                             }
                         }
                     }
                 } else {
-                    contentTextArea.setText("Can't send the message to the store! Make sure you're using the correct store name and correct formatting");
+                    contentTextArea.setText(
+                            "Can't send the message to the store! Make sure you're using the correct store name and correct formatting");
                 }
             }
-            if (e.getSource() == deleteAccountButton) { //WORKS BUT DOESN'T IMMEDIATELY SHOW THE ACCOUNT IS DELETED (SHOWS ON NEXT RUN OF APPLIATION)
-                int success = new Login(ACCOUNT_INFO_PATH).deleteAccount(sessionUser.getEmail());
+
+            if (e.getSource() == deleteAccountButton) { // WORKING
+                int success = login.deleteAccount(sessionUser.getEmail());
                 if (success == 1) {
                     contentTextArea.setText("Email not found!");
                 } else {
                     contentTextArea.setText("Account deleted successfully! You've been logged out.");
                 }
 
-                //Logout user after deleting account
+                // Logout user after deleting account
                 usernameTextField.setText("username");
                 passwordTextField.setText("password");
-                instructionsTextArea.setText("Login by entering your username and password. If you're registering a user, register by entering your username and password and designate your role by typing 'Seller' or 'Customer' into the user input field");
+                instructionsTextArea.setText(
+                        "Login by entering your username and password. If you're registering a user, register by entering your username and password and designate your role by typing 'Seller' or 'Customer' into the user input field");
                 userInputTextField.setText("user input");
 
                 addStoreButton.setVisible(false);
@@ -240,28 +228,38 @@ public class CLIClient extends JComponent implements Runnable {
                 deleteAccountButton.setVisible(false);
                 modifyAccountButton.setVisible(false);
                 viewStoresButton.setVisible(false);
+
+                // remove the user from the map
+                usermap = login.getUsers();
+                loginButton.setVisible(true);
+                registerButton.setVisible(true);
             }
-            if (e.getSource() == modifyAccountButton) { //WORKS BUT DOES'NT MODIFY UNTIL PROGRAM IS RESET/RERUN
+
+            if (e.getSource() == modifyAccountButton) { // WORKS
                 String newEmail = usernameTextField.getText();
                 String newPassword = passwordTextField.getText();
                 int success = client.modifyAccountButton(newEmail, newPassword);
-            
+
                 if (success == 1) {
-                    contentTextArea.setText("Email not found!");
+                    showError("Email not found!");
                 } else if (success == 2) {
-                    contentTextArea.setText("Invalid email format!");
+                    showError("Invalid email format!");
                 } else if (success == 3) {
-                    contentTextArea.setText("Email already exists! Please choose a different one.");
+                    showError("Email already exists! Please choose a different one.");
                 } else if (success == 4) {
                     contentTextArea.setText("Account updated successfully!");
+                    usermap = login.getUsers();
                 } else {
-                    contentTextArea.setText("There was an error updating your account.");
+                    showError("There was an error updating your account.");
                 }
+
+                
             }
             if (e.getSource() == editMessageButton) {
                 String[] inputContent = userInputTextField.getText().split(",");
                 if (inputContent.length != 2) {
-                    contentTextArea.append("\nCouldn't edit the message! Please fomat your input correctly to edit a message.");
+                    contentTextArea.append(
+                            "\nCouldn't edit the message! Please fomat your input correctly to edit a message.");
                 } else {
                     int index = Integer.parseInt(inputContent[0]);
                     String message = inputContent[1];
@@ -277,11 +275,11 @@ public class CLIClient extends JComponent implements Runnable {
                 } catch (Exception ex) {
                     contentTextArea.append("\nPlease enter an integer value!");
                 }
-                
+
                 client.deleteMessageButton(index);
                 contentTextArea.setText("Message deleted!");
             }
-            if (e.getSource() == sendMessageButton) { //WORKS
+            if (e.getSource() == sendMessageButton) { // WORKS
                 String message = "";
                 int output = 0;
                 if (dest != null) {
@@ -289,11 +287,12 @@ public class CLIClient extends JComponent implements Runnable {
                 } else {
                     String[] input = userInputTextField.getText().split(",");
                     if (input.length != 2) {
-                        contentTextArea.setText("Couldn't send a message! Make sure you're formatting your message correctly!");
+                        contentTextArea.setText(
+                                "Couldn't send a message! Make sure you're formatting your message correctly!");
                     } else {
                         dest = input[0];
                         message = input[1];
-                    }
+                    }contentTextArea.append("\n Failed to load the conversation. Please enter a valid email!");
                 }
 
                 try {
@@ -303,22 +302,23 @@ public class CLIClient extends JComponent implements Runnable {
                 }
 
                 if (output == 1) {
-                    contentTextArea.setText("You've been blocked by the user.");
-                } else if (output == 2) {
-                    contentTextArea.setText("Successfully sent the message!");
-                } else {
-                    contentTextArea.setText("Error");
+                    JOptionPane.showMessageDialog(null, "You've been blocked by the user.", "Blocked!", JOptionPane.ERROR_MESSAGE, null);
+                } else if (output != 2) {
+                    JOptionPane.showMessageDialog(null, "Check Your Input", "Error!", JOptionPane.ERROR_MESSAGE, null);
                 }
+                loadMessage();
+                
             }
-            
-            if (e.getSource() == loadConversationButton) { //WORKS BUT WHEN REENTERING IT SHOWS THE PREVIOUS VERSION OF THE CONVERSATION AS WELL                
+
+            if (e.getSource() == loadConversationButton) { // WORKS BUT WHEN REENTERING IT SHOWS THE PREVIOUS VERSION OF
+                                                           // THE CONVERSATION AS WELL
                 sendMessageButton.setVisible(true);
                 editMessageButton.setVisible(true);
                 deleteMessageButton.setVisible(true);
                 
                 loadConversationButton.setVisible(false);
                 blockUserButton.setVisible(false);
-                
+
                 dest = userInputTextField.getText();
                 User destUser = null;
 
@@ -332,9 +332,10 @@ public class CLIClient extends JComponent implements Runnable {
                 if (destUser != null) {
                     String messages = client.loadConversationButton(destUser);
                     contentTextArea.setText(messages);
-                    instructionsTextArea.setText("Send a message by typing the message you want to send, or edit a message by typing the message number and the edited message seperated by a comma ([message index],[edited message]), or delete a message by typing the message's number");
+                    instructionsTextArea.setText(
+                            "Send a message by typing the message you want to send, or edit a message by typing the message number and the edited message seperated by a comma ([message index],[edited message]), or delete a message by typing the message's number");
                 } else {
-                    contentTextArea.append("\n Failed to load the conversation. Please enter a valid email!");
+                    showError("\n Failed to load the conversation. Please enter a valid email!");
                 }
             }
         }
@@ -355,11 +356,10 @@ public class CLIClient extends JComponent implements Runnable {
         return sessionUser;
     }
 
-
     public String registerButton(String username, String password, String role) {
         int success = login.registerUser(username, password, role);
         String message = "";
-        if(success == 1) {
+        if (success == 1) {
             message = "Username already exists. Please choose a different one.";
         } else if (success == 2) {
             message = "Invalid email format!";
@@ -377,20 +377,22 @@ public class CLIClient extends JComponent implements Runnable {
     public int modifyAccountButton(String newEmail, String newPassword) {
         int success = 0;
 
-        success = new Login(ACCOUNT_INFO_PATH).editAccount(sessionUser, sessionUser.getEmail(), sessionUser.getPassword(), newEmail, newPassword);
+        success = login.editAccount(sessionUser, sessionUser.getEmail(),
+                sessionUser.getPassword(), newEmail, newPassword);
         return success;
     }
+
     public String messageButton() {
         sessionUser.loadMessage();
         User[] receivers = sessionUser.getReceiver().toArray(User[]::new);
-        
+
         String stores = "All stores include:\n";
         if (sessionUser.getUserType() == Roles.Customer) {
             Map<String, String> storeList = Store.getStores();
-                for (String key : storeList.keySet()) {
-                    stores += key + "\n";
-                }
+            for (String key : storeList.keySet()) {
+                stores += key + "\n";
             }
+        }
 
         String existingConversations = "Existing conversations:\n";
         for (User auser : receivers) {
@@ -398,12 +400,13 @@ public class CLIClient extends JComponent implements Runnable {
         }
 
         String allRecievers = "";
-        ArrayList<User> blockedUsers = sessionUser.getBlockedUsers();
+        ArrayList<String> blockedUsers = sessionUser.getBlockedUsers();
         if (sessionUser.getUserType() == Roles.Seller) {
             StringBuilder sb = new StringBuilder(allRecievers);
             usermap.values().stream()
-                .filter(user -> user.getUserType() == Roles.Customer && blockedUsers.stream().noneMatch(blockedUser -> blockedUser.getEmail().equals(user.getEmail())))
-                .forEach(user -> sb.append(user.getEmail()).append("\n"));
+                    .filter(user -> user.getUserType() == Roles.Customer && blockedUsers.stream()
+                            .noneMatch(blockedUser -> blockedUser.equals(user.getEmail())))
+                    .forEach(user -> sb.append(user.getEmail()).append("\n"));
             allRecievers = sb.toString();
 
             String finalMessage = existingConversations + "\nList of users you can message:\n" + allRecievers;
@@ -411,11 +414,12 @@ public class CLIClient extends JComponent implements Runnable {
         } else if (sessionUser.getUserType() == Roles.Customer) {
             StringBuilder sb = new StringBuilder(allRecievers);
             usermap.values().stream()
-                .filter(user -> user.getUserType() == Roles.Seller && blockedUsers.stream().noneMatch(blockedUser -> blockedUser.getEmail().equals(user.getEmail())))
-                .forEach(user -> {
-                    sb.append(user.getEmail());
-                    sb.append("\n");
-                });
+                    .filter(user -> user.getUserType() == Roles.Seller && blockedUsers.stream()
+                            .noneMatch(blockedUser -> blockedUser.equals(user.getEmail())))
+                    .forEach(user -> {
+                        sb.append(user.getEmail());
+                        sb.append("\n");
+                    });
             allRecievers = sb.toString();
         }
         String finalMessage = stores + existingConversations + "\nList of users you can message:\n" + allRecievers;
@@ -426,21 +430,21 @@ public class CLIClient extends JComponent implements Runnable {
         String message = mess;
         User sender = sessionUser;
         User destUser = null;
-        //Checking customer list
+        // Checking customer list
         if (sessionUser.getUserType().toString().equals("Customer")) {
             for (int i = 0; i < usermap.size(); i++) {
                 if (!usermap.values().contains(destUser = new Seller(dest))) {
-                    return 5; //user doesn't exist error
+                    return 5; // user doesn't exist erroractionListener
                 }
             }
         } else {
             for (int i = 0; i < usermap.size(); i++) {
                 if (!usermap.values().contains(destUser = new Customer(dest))) {
-                    return 5; //user doesn't exist error
+                    return 5; // user doesn't exist error
                 }
             }
         }
-        
+
         if (checkAccount(dest)) {
             try {
                 return sendMessage(message, sender, destUser);
@@ -455,7 +459,7 @@ public class CLIClient extends JComponent implements Runnable {
     public String loadConversationButton(User user) {
         String messages = "";
         int index = 0;
-        messageList = sessionUser.getCon(user);
+        messageList = sessionUser.getConversation(user);
         for (int i = 0; i < messageList.size(); i++) {
             messages += index + ". " + messageList.get(i).toString() + "\n";
             index += 1;
@@ -479,24 +483,19 @@ public class CLIClient extends JComponent implements Runnable {
         Message.tidy();
     }
 
-    private static final String ACCOUNT_INFO_PATH = "file" + File.separator + "account_list.txt";
-
-    private static Login login = new Login(ACCOUNT_INFO_PATH);
-    private static Map<String, User> usermap = login.getUsers();
-
     public void run() {
         JFrame frame = new JFrame();
         frame.setTitle("Project 5");
         Container content = frame.getContentPane();
         content.setLayout(new BorderLayout());
-        client = new CLIClient(); //initializing client
+        client = new Client(); // initializing client
 
-        frame.setSize(800, 300);
+        frame.setSize(800, 800);
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
 
-        //create login/logout/register items
+        // create login/logout/register items
         usernameTextField = new JTextField(15);
         passwordTextField = new JTextField(15);
 
@@ -509,16 +508,16 @@ public class CLIClient extends JComponent implements Runnable {
         logoutButton = new JButton("Logout");
         logoutButton.addActionListener(actionListener);
 
-        //create user items
+        // create user items
         instructionsTextArea = new JTextArea();
         instructionsTextArea.setLineWrap(true);
         instructionsTextArea.setWrapStyleWord(true);
-        instructionsTextArea.setPreferredSize(new Dimension(235, 200));
+        instructionsTextArea.setPreferredSize(new Dimension(235, 600));
 
         contentTextArea = new JTextArea();
         contentTextArea.setLineWrap(true);
         contentTextArea.setWrapStyleWord(true);
-        contentTextArea.setPreferredSize(new Dimension(235, 200));
+        contentTextArea.setPreferredSize(new Dimension(235, 600));
         userInputTextField = new JTextField(70);
 
         accountManagementButton = new JButton("Account Management");
@@ -532,8 +531,8 @@ public class CLIClient extends JComponent implements Runnable {
         blockUserButton = new JButton("Block User");
         blockUserButton.setVisible(false);
         blockUserButton.addActionListener(actionListener);
-        
-        //create seller specific items
+
+        // create seller specific items
         addStoreButton = new JButton("Add Store");
         addStoreButton.setVisible(false);
         addStoreButton.addActionListener(actionListener);
@@ -542,20 +541,21 @@ public class CLIClient extends JComponent implements Runnable {
         viewStoresButton.setVisible(false);
         viewStoresButton.addActionListener(actionListener);
 
-        //create customer specific item
+        // create customer specific item
         messageStoreButton = new JButton("Message Store");
         messageStoreButton.setVisible(false);
         messageStoreButton.addActionListener(actionListener);
 
-        //Instantiate text fields
+        // Instantiate text fields
         usernameTextField.setText("username");
         passwordTextField.setText("password");
-        instructionsTextArea.setText("Login by entering your username and password. If you're registering a user, register by entering your username and password and designate your role by typing 'Seller' or 'Customer' into the user input field");
+        instructionsTextArea.setText(
+                "Login by entering your username and password. If you're registering a user, register by entering your username and password and designate your role by typing 'Seller' or 'Customer' into the user input field");
         contentTextArea.setText("");
         userInputTextField.setText("user input");
 
-        //Adding items to JPanel
-        //Login/Logout/Register
+        // Adding items to JPanel
+        // Login/Logout/Register
         JPanel topPanel = new JPanel();
         topPanel.add(usernameTextField);
         topPanel.add(passwordTextField);
@@ -564,26 +564,26 @@ public class CLIClient extends JComponent implements Runnable {
         topPanel.add(logoutButton);
         content.add(topPanel, BorderLayout.NORTH);
 
-        //User & Seller Items
+        // User & Seller Items
         Box leftPanel = Box.createVerticalBox();
         leftPanel.add(accountManagementButton);
         leftPanel.add(messageButton);
         leftPanel.add(viewStoresButton);
         content.add(leftPanel, BorderLayout.WEST);
 
-        //Instructions and Message content
+        // Instructions and Message content
         JPanel centerPanel = new JPanel();
         centerPanel.add(instructionsTextArea);
         centerPanel.add(contentTextArea);
         content.add(centerPanel, BorderLayout.CENTER);
 
-        //User input text field
+        // User input text field
         JPanel bottomPanel = new JPanel();
-        
+
         bottomPanel.add(userInputTextField);
         content.add(bottomPanel, BorderLayout.SOUTH);
 
-        //Account management buttons and sendmessage buttons
+        // Account management buttons and sendmessage buttons
         deleteAccountButton = new JButton("Delete Account");
         deleteAccountButton.addActionListener(actionListener);
         deleteAccountButton.setVisible(false);
@@ -621,31 +621,44 @@ public class CLIClient extends JComponent implements Runnable {
         content.add(rightPanel, BorderLayout.EAST);
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new CLIClient());
-    }
-
-    public CLIClient() {
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                /* set oldX and oldY coordinates to beginning mouse press*/
-                oldX = e.getX();
-                oldY = e.getY();
-            }
-        });
-    }
-
     private static boolean operations(User user) {
         if (user.getUserType().equals(Roles.Seller)) {
-            //set seller specific buttons visible
+            // set seller specific buttons visible
             viewStoresButton.setVisible(true);
         }
-        //make all operations buttons visible along with instructions
+        // make all operations buttons visible along with instructions
         accountManagementButton.setVisible(true);
         messageButton.setVisible(true);
 
         return true;
+    }
+
+
+    private static void showError(String s) {
+        JOptionPane.showMessageDialog(null, s, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    private void loadMessage() {
+        dest = null; // reset message destination
+
+        contentTextArea.setText(client.messageButton());
+        sendMessageButton.setVisible(true);
+        blockUserButton.setVisible(true);
+        loadConversationButton.setVisible(true);
+
+        if (sessionUser.getUserType() == Roles.Customer) {
+            messageStoreButton.setVisible(true);
+            instructionsTextArea.setText(
+                    "Select an existing conversation by typing the email of the user in the user input input field, or type in a user from the list along with the message you want to send seperated by a comma (,) to create a new conversation, or type the store's name along with the message you want to send seperated by a comma. The format for sending a message is [email],[message] or [store],[message]");
+        } else {
+            instructionsTextArea.setText(
+                    "Select an existing conversation by typing the email of the user in the user input input field or type in a user from the list along with the message you want to send seperated by a comma (,) to create a new conversation. The format for sending a message is [email],[message]");
+        }
+
+        editMessageButton.setVisible(false);
+        deleteMessageButton.setVisible(false);
+        deleteAccountButton.setVisible(false);
+        modifyAccountButton.setVisible(false);
     }
 
     private static boolean checkAccount(String address) {
@@ -655,13 +668,13 @@ public class CLIClient extends JComponent implements Runnable {
     private static int sendMessage(String message, User sender, User dest) throws NotSCException {
         Seller seller = null;
         Customer customer = null;
-        //System.out.println("Please input the message.");
+        // System.out.println("Please input the message.");
         if (sender.getUserType().equals(dest.getUserType())) {
             throw new NotSCException(
                     "Error: Do not send to " + sender.getUserType().name() + " as a " + sender.getUserType().name());
         }
         if (dest.getBlockedUsers().contains(sender)) {
-            //System.out.println("You've been blocked by the user.");
+            // System.out.println("You've been blocked by the user.");
             return 1;
         }
         if (sender.getUserType().equals(Roles.Seller)) {

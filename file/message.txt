@@ -1,0 +1,9 @@
+email0@mail.com;;email1@mail.com;;true;;hello;;124892;;true;;true
+email0@mail.com;;niu61@purdue.edu;;false;;iuherv;;1681154945352;;true;;true
+email0@mail.com;;niu61@purdue.edu;;false;;good;;1681155275876;;true;;true
+email0@mail.com;;niu61@purdue.edu;;false;;wehfu;;1681155364437;;true;;true
+email0@mail.com;;niu61@purdue.edu;;true;;hello mate;;1681155737433;;true;;false
+email3@mail.com;;niu61@purdue.edu;;true;;iqwodj;;1681172308124;;false;;false
+email0@mail.com;;niu61@purdue.edu;;false;;hw;;1681174475473;;true;;true
+email2@mail.com;;email1@mail.com;;true;;wefuh;;1681175344639;;true;;true
+email0@mail.com;;niu61@purdue.edu;;false;;fucker;;1682955484078;;true;;false

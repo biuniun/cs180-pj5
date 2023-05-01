@@ -1,17 +1,18 @@
 package users;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.Socket;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Message {
-	private static final String MESS_PATH = "file" + File.separator + "message.txt";
+	// private static final String MESS_PATH = "file" + File.separator + "message.txt";
 	private Seller seller;
 	private Customer customer;
 	private boolean sender; // true for seller, false for customers
@@ -99,10 +100,10 @@ public class Message {
 	}
 
 	public void writeToRecord() {
-		try (PrintWriter pw = new PrintWriter(new FileOutputStream(new File(MESS_PATH), true))) {
+		try (PrintWriter pw = write("message", true)) {
 			pw.println(fileExport());
-		} catch (FileNotFoundException e) {
-			System.out.println("Error writing the message, contact administrator!");
+		}  catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -142,9 +143,15 @@ public class Message {
 		return message.getTime() == this.getTime() && message.isSender() == this.isSender();
 	}
 
+	@Override
+	public int hashCode() {
+		return Objects.hash(time, sender);
+	}
+	
+
 	public static boolean tidy() {
 		ArrayList<Message> messages = new ArrayList<>();
-		try (BufferedReader bf = new BufferedReader(new FileReader(new File(MESS_PATH)))) {
+		try (BufferedReader bf = read("message")) {
 			bf.lines().filter(s -> !s.isBlank()).forEach(s -> {
 				Message m = new Message(s);
 				if (messages.contains(m))
@@ -157,7 +164,7 @@ public class Message {
 			return false;
 		}
 
-		try (PrintWriter pw = new PrintWriter(new FileOutputStream(new File(MESS_PATH), false), true)) {
+		try (PrintWriter pw = write("message", false)) {
 			messages.forEach(c -> pw.print(c.fileExport()));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -166,5 +173,26 @@ public class Message {
 		
 		return true;
 	}
+
+	private static BufferedReader read(String str) throws IOException {
+        try (Socket s = new Socket("127.0.0.1", 8888);
+                PrintWriter pw = new PrintWriter(new OutputStreamWriter(s.getOutputStream()))) {
+            pw.print(str + "\n0\n");
+            pw.flush();
+            return new BufferedReader(new InputStreamReader(s.getInputStream()));
+
+        }
+    }
+
+	private static PrintWriter write(String str, boolean append) throws IOException {
+        try (Socket s = new Socket("127.0.0.1", 8888)) {
+			PrintWriter pw = new PrintWriter(new OutputStreamWriter(s.getOutputStream()), append);
+            pw.print(str + "\n1\n");
+            pw.flush();
+            return pw;
+
+        }
+    }
+
 
 }

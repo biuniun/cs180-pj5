@@ -1,17 +1,16 @@
 package users;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Store {
     private Seller seller;
     private String storeName;
-    private static final String STORE_LIST_PATH = "file" + File.separator + "store.txt";
 
     public Store(Seller seller, String storeName) {
         this.seller = seller;
@@ -36,11 +35,20 @@ public class Store {
     }
 
     public boolean saveStore() {
-        try (BufferedReader bf = new BufferedReader(new FileReader(new File(STORE_LIST_PATH)));
-                PrintWriter pw = new PrintWriter(new FileOutputStream(new File(STORE_LIST_PATH), true))) {
-            if (!bf.lines().map(s -> s.split(";;")[0]).filter(s -> s.equals(this.getStoreName())).findAny()
+
+        try (Socket socket = new Socket("127.0.0.1", 0);
+                BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                PrintWriter pw = new PrintWriter(
+                        new OutputStreamWriter(new Socket("127.0.0.1", 1).getOutputStream()));
+                PrintWriter ph = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()))) {
+            ph.print("store\n0\n");
+            pw.print("store\n1\n");
+            pw.flush();
+            ph.flush();
+            if (!br.lines().map(s -> s.split(";;")[0]).filter(s -> s.equals(this.getStoreName())).findAny()
                     .isPresent()) {
                 pw.write(getStoreName() + ";;" + getSeller());
+                pw.flush();
                 return true;
             }
             return false;
@@ -52,7 +60,11 @@ public class Store {
 
     public static Map<String, String> getStores() {
         Map<String, String> map = new HashMap<>();
-        try (BufferedReader bf = new BufferedReader(new FileReader(new File(STORE_LIST_PATH)))) {
+        try (Socket socket = new Socket("127.0.0.1", 0);
+            BufferedReader bf = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            PrintWriter pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()))) {
+            pw.write("store\n0\n");
+            pw.flush();
             bf.lines().forEach(l -> {
                 String[] args = l.split(";;");
                 map.put(args[0], args[1]);

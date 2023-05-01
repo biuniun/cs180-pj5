@@ -8,7 +8,7 @@ public class Customer extends User {
     }
 
     @Override
-    public ArrayList<Message> getCon(User user) {
+    public ArrayList<Message> getConversation(User user) {
         return new ArrayList<>(super.getHistory().stream()
                 .filter(m -> m.getSeller().equals(user))
                 .filter(m -> m.getCustomer().equals(this))
@@ -19,15 +19,5 @@ public class Customer extends User {
     public String toString() {
         return this.getEmail();
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == this)
-            return true;
-        if (!(o instanceof User)) {
-            return false;
-        }
-        User user = (User) o;
-        return user.getEmail().equals(this.getEmail());
-    }
+	
 }
