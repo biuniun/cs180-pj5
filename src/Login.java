@@ -1,5 +1,3 @@
-package users;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -38,7 +36,7 @@ public class Login {
         } catch (IOException e) {
             e.printStackTrace();
             return false;
-        }
+            }
     }
 
     public Map<String, User> getUsers() {
